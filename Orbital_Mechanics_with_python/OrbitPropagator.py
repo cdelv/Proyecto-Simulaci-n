@@ -66,7 +66,6 @@ class OrbitPropagator:
              
         self.rs=self.ys[:,:3]
         self.vs=self.ys[:,3:]
-
         
     def diffy_q(self,t,y):
     
@@ -100,15 +99,73 @@ class OrbitPropagator:
 
         print('Calculating COEs....')
 
+
         self.coes=np.zeros((self.n_steps,6))
 
         for n in range (self.n_steps):
-            
+
             self.coes[n:]=t.rv2coes(self.rs[n,:],self.vs[n,:],mu=self.cb['mu'],degres=degres)
 
+    def plot_coes(self,hours=False,days=False,show_plot=False,save_plot=False,title='COEs',figsize=(16,8)):
+    	print('Ploting COEs ...')
 
+    	#create figure and axses
+    	fig,axs=plt.subplots(nrows=2,ncols=3,figsize=figsize)
 
+    	#figure titles
+    	fig.suptitle(title,fontsize=20)
 
+    	#x axis
+    	if hours: 
+    		ts=self.ts/3600
+    		xlabel='Time (hours)'
+    	elif days:
+    		ts=self.ts/3600/24
+    		xlabel='Time (days)'
+    	else:
+    		ts=self.ts
+    		xlabel='Time (seconds)'
+
+    	#plot true anomaly
+    	axs[0,0].plot(ts,self.coes[:,3])
+    	axs[0,0].set_title('True anomaly vs.Time')
+    	axs[0,0].grid(True)
+    	axs[0,0].set_ylabel('Angle (degrees)')
+
+    	#plot semi major axis
+    	axs[1,0].plot(ts,self.coes[:,0])
+    	axs[1,0].set_title('Semi Major Axis vs.Time')
+    	axs[1,0].grid(True)
+    	axs[1,0].set_ylabel('Semi Major Axis (km)')
+    	axs[1,0].set_xlabel(xlabel)
+
+    	#plot eccentricity
+    	axs[0,1].plot(ts,self.coes[:,1])
+    	axs[0,1].set_title('Eccentricity vs.Time')
+    	axs[0,1].grid(True)
+
+    	#plot argument of periage
+    	axs[0,2].plot(ts,self.coes[:,0])
+    	axs[0,2].set_title('Argument of Periapse vs.Time')
+    	axs[0,2].grid(True)
+
+    	#plot inclination
+    	axs[1,1].plot(ts,self.coes[:,2])
+    	axs[1,1].set_title('Inclination vs.Time')
+    	axs[1,1].grid(True)
+    	axs[1,1].set_ylabel('Angle (degrees)')
+    	axs[1,1].set_xlabel(xlabel)
+
+    	#plot RAAN
+    	axs[1,2].plot(ts,self.coes[:,5])
+    	axs[1,2].set_title('RAAN vs.Time')
+    	axs[1,2].grid(True)
+    	axs[1,2].set_xlabel(xlabel)
+
+    	if show_plot:
+    		plt.show()
+    	if save_plot:
+    		plt.savefig(title+'.png',dpi=300)
 
     def plot_3d(self,show_plot=False,save_plot=False,title='Test Title'):
         

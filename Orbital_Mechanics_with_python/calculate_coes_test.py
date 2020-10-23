@@ -5,7 +5,7 @@ from OrbitPropagator import OrbitPropagator as OP
 from OrbitPropagator import null_perts 
 
 #time parameters
-tspan=3600*24*20.0
+tspan=3600*24
 dt=100.0
 
 #central body
@@ -20,3 +20,4 @@ if __name__ == '__main__':
 
 
 	op.calculate_coes()
+	op.plot_coes(show_plot=True,hours=True)
