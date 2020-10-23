@@ -16,7 +16,7 @@ if __name__ == '__main__':
 	perts=null_perts()
 	perts['J2']=True
 
-	op=OP(t.tle2coes('HJ-2A.txt'),tspan,dt,coes=True,perts=perts)
+	op=OP(t.tle2coes('HJ-2A.txt', degres=True),tspan,dt,coes=True,perts=perts, degres=True)
 
 
 	op.calculate_coes()

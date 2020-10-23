@@ -13,6 +13,9 @@ r2d=180/np.pi
 def norm(v):
     return np.linalg.norm(v)
 
+def normed(v):
+    return np.array(v)/norm(v)
+
 def plot_n_orbits(rs,labels,cb=pd.earth, show_plot=False,save_plot=False,title='Many Orbits'):
     
     #3D plot
@@ -23,7 +26,7 @@ def plot_n_orbits(rs,labels,cb=pd.earth, show_plot=False,save_plot=False,title='
     
     n=0
     for r in rs:
-        ax.plot(r[:,0],r[:,1],r[:,2],label=labels[n])
+        ax.plot(r[:,0],r[:,1],r[:,2],label=labels[n],zorder=10)
         #ax.plot([r[0,0]],[r[0,1]],[r[0,2]],label='Initial position')
         n+=1
     
@@ -32,7 +35,7 @@ def plot_n_orbits(rs,labels,cb=pd.earth, show_plot=False,save_plot=False,title='
     _x=cb['radius']*np.cos(_u)*np.sin(_v)
     _y=cb['radius']*np.sin(_u)*np.sin(_v)
     _z=cb['radius']*np.cos(_v)
-    ax.plot_surface(_x,_y,_z,cmap='Blues')
+    ax.plot_surface(_x,_y,_z,cmap='Blues',zorder=0)
     
     l=cb['radius']*2.0
     x,y,z=[[0,0,0],[0,0,0],[0,0,0]]
@@ -166,7 +169,7 @@ def ecc_anomaly(arr,method,tol=1e-8):
         print('Invalid method for eccentric anomaly')
 
 #takes text file containing TLEs and return classical orbital elements and other parameters  
-def tle2coes(tle_filename,mu=pd.earth['mu']):
+def tle2coes(tle_filename,mu=pd.earth['mu'], degres=False):
     #read tle file
     with open(tle_filename,'r') as f:
         lines=f.readlines()
@@ -237,6 +240,29 @@ def true_anomaly(arr):
 
 def tle2rv(tle_filename):
     return coes2rv(tle2coes(tle_filename))
+
+#calculate atmosferic density from given altitud
+def calc_atmospheric_density(z):
+    rhos,zs=find_rho_z(z)
+    if rhos[0]==0: return 0.0
+
+    Hi=-(zs[1]-zs[0])/m.log(rhos[1]/rhos[0])
+
+    return rhos[0]*m.exp(-(z-zs[0])/Hi)
+
+#find endpoints of altitudes and density surrounding imput altitude
+def find_rho_z(z,zs=pd.earth['zs'],rhos=pd.earth['rhos']):
+    if not 1.0<z<1000.0:
+        return [[0.0,0.0],[0.0,0.0]]
+
+    #find the two point surrounding the given input altitude
+    for n in range(len(rhos)-1):
+        if zs[n]<z<zs[n+1]:
+            return [[rhos[n],rhos[n+1]],[zs[n],zs[n+1]]]
+
+    #if out of range return 0
+    return [[0.0,0.0],[0.0,0.0]]
+
 
 
 

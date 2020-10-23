@@ -19,7 +19,10 @@ def null_perts():
     'A':0,
     'mu':0,
     'moon gravity':False,
-    'solar_gravity':False
+    'solar_gravity':False,
+    'thrust':0,
+    'thrust_direction':0,
+    'isp':0
 
     }
 
@@ -34,18 +37,19 @@ class OrbitPropagator:
             self.r0=state0[:3]
             self.v0=state0[3:]
     
-        self.y0=self.r0.tolist()+self.v0.tolist()
+        
         self.tspan=tspan
         self.dt=dt
         self.cb=cb
-        self.mass=mass0
+        self.mass0=mass0
+        self.y0=self.r0.tolist()+self.v0.tolist()+[self.mass0]
 
         #number of steps
         self.n_steps=int(np.ceil(self.tspan/self.dt))
         
         #initialize arrays
         self.ts=np.zeros((self.n_steps,1))
-        self.ys=np.zeros((self.n_steps,6))
+        self.ys=np.zeros((self.n_steps,7))
         self.ts[0]=0
         self.ys[0,:]=self.y0
         self.step=1
@@ -79,13 +83,14 @@ class OrbitPropagator:
        	#ectract array after the propagation
     	self.ts=self.ts[:self.step]    
     	self.rs=self.ys[:self.step,:3]
-    	self.vs=self.ys[:self.step,3:]
+    	self.vs=self.ys[:self.step,3:6]
+    	self.masses=self.ys[:self.step,-1]
     	self.alts=(np.linalg.norm(self.rs,axis=1)-self.cb['radius']).reshape((self.step,1))
         
     def diffy_q(self,t,y):
     
         #unpack state
-        rx,ry,rz,vx,vy,vz=y
+        rx,ry,rz,vx,vy,vz,mass0=y
         r=np.array([rx,ry,rz])
         v=np.array([vx,vy,vz])
     
@@ -116,11 +121,20 @@ class OrbitPropagator:
         	#calculate motion of s/c with respect to rotating atmosphere
         	v_rel=v-np.cross(self.cb['atm_rot_vector'],r)
 
-        	drag=-v_rel*0.5*rho*np.linalg.norm(v_rel)*self.perts['Cd']*self.perts['A']/self.mass
+        	drag=-v_rel*0.5*rho*np.linalg.norm(v_rel)*self.perts['Cd']*self.perts['A']/self.mass0
 
         	a+=drag
+
+
+        #thust perturbation
+        if self.perts['thrust']:
+        	#thrust vector
+        	a+=self.perts['thrust_direction']*_t.normed(v)*self.perts['thrust']/mass0/1000.0  #km/s²
+
+        	#derivate of totl mass
+        	dmdt=-self.perts['thrust']/self.perts['isp']/9.81
         
-        return [vx,vy,vz,a[0],a[1],a[2]]
+        return [vx,vy,vz,a[0],a[1],a[2],dmdt]
 
     def calculate_coes(self, degres=True):
 
@@ -201,7 +215,7 @@ class OrbitPropagator:
         ax=fig.add_subplot(111,projection='3d')
         
         #plot trayectory and starting point
-        ax.plot(self.rs[:,0],self.rs[:,1],self.rs[:,2],'w',label='Trayectory',zorder=10)
+        ax.plot(self.rs[:,0],self.rs[:,1],self.rs[:,2],'r',label='Trayectory',zorder=10)
         ax.plot([self.rs[0,0]],[self.rs[0,1]],[self.rs[0,2]],'wo',label='Initial position',zorder=10)
                
         #plot earth
