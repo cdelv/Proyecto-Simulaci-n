@@ -29,63 +29,113 @@ def null_perts():
 
 class OrbitPropagator:
     
-    def __init__(self,state0,tspan,dt,coes=False,degres=True,cb=pd.earth, perts=null_perts(),mass0=0):
+    def __init__(self,state0,tspan,dt,coes=False,degres=True,cb=pd.earth, perts=null_perts(),mass0=0,sc={}):
         
         if coes:
             self.r0,self.v0,_=_t.coes2rv(state0,degres=degres,mu=cb['mu'])
         else:
             self.r0=state0[:3]
             self.v0=state0[3:]
-    
-        
+
         self.tspan=tspan
         self.dt=dt
         self.cb=cb
         self.mass0=mass0
-        self.y0=self.r0.tolist()+self.v0.tolist()+[self.mass0]
+
 
         #number of steps
-        self.n_steps=int(np.ceil(self.tspan/self.dt))
+        self.n_steps=int(np.ceil(self.tspan/self.dt))+1
         
         #initialize arrays
-        self.ts=np.zeros((self.n_steps,1))
-        self.ys=np.zeros((self.n_steps,7))
+        self.ts=np.zeros((self.n_steps+1,1))
+        self.ys=np.zeros((self.n_steps+1,7))
+        self.alts=np.zeros((self.n_steps+1,1))
         self.ts[0]=0
-        self.ys[0,:]=self.y0
-        self.step=1
+        self.step=0
+
+        #initial conditions 
+        self.ys[0,:]=self.r0.tolist()+self.v0.tolist()+[self.mass0]
+        self.alts[0]=_t.norm(self.r0)-self.cb['radius']
         
         #initiate solver
         self.solver=ode(self.diffy_q)
         self.solver.set_integrator('lsoda')
-        self.solver.set_initial_value(self.y0,0)
+        self.solver.set_initial_value(self.ys[0,:],0)
 
         #define perturbations dictionary
         self.perts=perts
 
+        #define stop conditions dictionary
+        self.stop_conditions_dict=sc
 
+        #define dictionary to check internal method
+        self.stop_conditions_map={'max_alt':self.check_max_alt,'min_alt':self.check_min_alt}
+
+        #create stop conditions function list with deorbit check
+        self.stop_conditions_functions=[self.check_deorbit]
+
+        #fill in the rest of stop conditions
+        for key in self.stop_conditions_dict.keys():
+        	self.stop_conditions_functions.append(self.stop_conditions_map[key])
+
+        #propagate orbit
         self.propagate_orbit()
+
+    def check_deorbit(self):
+    	if self.alts[self.step]<self.cb['deorbit_altitude']:
+    		print('Spacecraft has deorbited after %.1f second' % self.ts[self.step])
+    		return False
+    	return True
+
+    def check_max_alt(self):
+    	if self.alts[self.step]<self.stop_conditions_dict['max_alt']:
+    		print('Spacecraft reached max altitude after %.1f second' %self.ts[self.step])
+    		return False
+    	return True
+
+    def check_min_alt(self):
+    	if self.alts[self.step]<self.stop_conditions_dict['min_alt']:
+    		print('Spacecraft reached min altitude after %.1f second' %self.ts[self.step])
+    		return False
+    	return True
+
+    def check_stop_conditions(self):
+    	#for each stop condition
+    	for sc in self.stop_conditions_functions:
+
+    		#if return False
+    		if not sc():
+
+    			#stop condition reached, return false
+    			return False
+
+    	#if stop condition is not reached return true
+    	return  True
     
     def propagate_orbit(self):
 
     	print('Propagating orbit...')
    
        	#propagate the orbit
-    	while self.solver.successful() and self.step<self.n_steps:
+    	while self.solver.successful() and self.step<self.n_steps and self.check_stop_conditions():
 
         	#integrate step
         	self.solver.integrate(self.solver.t+self.dt)
+        	self.step+=1
 
         	#extract values from solver
         	self.ts[self.step]=self.solver.t
         	self.ys[self.step]=self.solver.y
-        	self.step+=1
+
+        	#calculate altitude at these time step
+        	self.alts[self.step]=_t.norm(self.solver.y[:3])-self.cb['radius']
 
        	#ectract array after the propagation
     	self.ts=self.ts[:self.step]    
     	self.rs=self.ys[:self.step,:3]
     	self.vs=self.ys[:self.step,3:6]
     	self.masses=self.ys[:self.step,-1]
-    	self.alts=(np.linalg.norm(self.rs,axis=1)-self.cb['radius']).reshape((self.step,1))
+    	self.alts=self.alts[:self.step]
         
     def diffy_q(self,t,y):
     
