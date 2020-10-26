@@ -19,7 +19,7 @@ def normed(v):
 def plot_n_orbits(rs,labels,cb=pd.earth, show_plot=False,save_plot=False,title='Many Orbits'):
     
     #3D plot
-    fig=plt.figure(figsize=(16,8))
+    fig=plt.figure(figsize=(200,100))
     ax=fig.add_subplot(111,projection='3d')
     
     #plot trayectory and starting point
