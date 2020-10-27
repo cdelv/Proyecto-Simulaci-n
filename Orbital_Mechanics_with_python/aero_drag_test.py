@@ -37,7 +37,7 @@ if __name__ == '__main__':
 	e=(ra-rp)/(ra+rp)
 
 	#initial state value
-	state0=[a,e,i,ta,aop,raan,191031]
+	state0=[a,e,i,ta,aop,raan]
 
 
 	op=OP(state0,tspan,dt,degres=True,coes=True,mass0=mass0,perts=perts)

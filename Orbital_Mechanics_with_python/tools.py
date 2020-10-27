@@ -1,5 +1,6 @@
 import numpy as np
 import datetime
+import spiceypy as spice
 import matplotlib.pyplot as plt
 import math as m
 from mpl_toolkits.mplot3d import Axes3D
@@ -19,14 +20,14 @@ def normed(v):
 def plot_n_orbits(rs,labels,cb=pd.earth, show_plot=False,save_plot=False,title='Many Orbits'):
     
     #3D plot
-    fig=plt.figure(figsize=(200,100))
+    fig=plt.figure(figsize=(300,300))
     ax=fig.add_subplot(111,projection='3d')
     
     #plot trayectory and starting point
     
     n=0
     for r in rs:
-        ax.plot(r[:,0],r[:,1],r[:,2],label=labels[n],zorder=10)
+        ax.plot(r[:,0],r[:,1],r[:,2],label=labels[n],zorder=5)
         #ax.plot([r[0,0]],[r[0,1]],[r[0,2]],label='Initial position')
         n+=1
     
@@ -59,18 +60,18 @@ def plot_n_orbits(rs,labels,cb=pd.earth, show_plot=False,save_plot=False,title='
     if show_plot:
         plt.show()
     if save_plot:
-        plt.savefig(title+'.png',dpi=300)
+        plt.savefig(title+'.png',dpi=200)
 
 #convert classical orbital elements to r and v vectors
 def coes2rv(coes,degres=False,mu=pd.earth['mu']):
     if degres:
-        a,e,i,ta,aop,raan,date=coes
+        a,e,i,ta,aop,raan=coes
         i*=d2r
         ta*=d2r
         aop*=d2r
         raan*=d2r
     else:
-        a,e,i,ta,aop,raan,date=coes
+        a,e,i,ta,aop,raan=coes
 
     E=ecc_anomaly([ta,e],'tae')
 
@@ -87,57 +88,24 @@ def coes2rv(coes,degres=False,mu=pd.earth['mu']):
     r=np.dot(perif2eci,r_perif)
     v=np.dot(perif2eci,v_perif)
 
-    return r,v,date
+    return r,v
 
 #convert r and v vectors to coes(classical orbital elements) 
-def rv2coes(r,v,mu=pd.earth['mu'],degres=False,print_results=False):
-    #norm of position vector
-    r_norm=norm(r)
+def rv2coes(state,et=0,mu=pd.earth['mu'],degres=False,print_results=False):
+    #calculate orbital elements for given state
+    rp,e,i,raan,aop,ma,t0,mu,ta,a,T=spice.oscltx(state,et,mu)
 
-    #especific angular momentum
-    h=np.cross(r,v)
-    h_norm=norm(h)
 
-    #inclination
-    i=m.acos(h[2]/h_norm)
-
-    #eccentricity vector
-    e=((norm(v)**2-mu/r_norm)*r-np.dot(r,v)*v)/mu
-
-    #eccentricity escalar
-    e_norm=norm(e)
-
-    #node line
-    N=np.cross([0,0,1],h)
-    N_norm=norm(N)
-
-    #RAAN
-    raan=m.acos(N[0]/N_norm)
-    if N[1]<0: raan=2*np.pi-raan #cuadrant check
-
-    #argument of perigee
-    aop=m.acos(np.dot(N,e)/N_norm/e_norm)
-    if e[2]<0: aop=2*np.pi-aop #cuadrant check
-
-    #true anomaly
-    ta=m.acos(np.dot(e,r)/e_norm/r_norm)
-    if np.dot(r,v)<0: ta=2*np.pi-ta
-
-    #semi major axis
-    a=r_norm*(1+e_norm*m.cos(ta))/(1-e_norm**2)
-
+    if degres:
+        i*=d2r
+        ta*=d2r
+        aop*=d2r
+        raan*=d2r
     if print_results:
-        print('a',a)
-        print('e',e)
-        print('i',i*r2d)
-        print('RAAN',raan*r2d)
-        print('AOP',aop*r2d)
-        print('TA',ta*r2d)
+        print(osc_els)
 
-    #convert to degres if specify
-    if degres: return[a,e_norm,i*r2d,ta*r2d,aop*r2d,raan*r2d]
-    else: return[a,e_norm,i,ta,aop,raan] 
-
+    return a,e,i,ta,aop,raan
+    
 #inertial to perifocal rotation matrix
 def eci2perif(raan,aop,i):
     row0=[-m.sin(raan)*m.cos(i)*m.sin(aop)+m.cos(raan)*m.cos(aop),m.cos(raan)*m.cos(i)*m.sin(aop)+m.sin(raan)*m.cos(aop),m.sin(i)*m.sin(aop)]
@@ -211,7 +179,7 @@ def tle2coes(tle_filename,mu=pd.earth['mu'], degres=False):
     #calculate the true anomaly
     ta=true_anomaly([E,e])
 
-    return a,e,i,ta,aop,raan,[year,month,day,hour]
+    return a,e,i,ta,aop,raan
 
 def calc_epoch(epoch):
     #year
@@ -239,6 +207,7 @@ def true_anomaly(arr):
     return 2*np.arctan(np.sqrt((1+e)/(1-e)))*np.tan(E/2.0)
 
 def tle2rv(tle_filename):
+
     return coes2rv(tle2coes(tle_filename))
 
 #calculate atmosferic density from given altitud

@@ -20,7 +20,7 @@ sun={
     'mu':1.32712e11,
     'radius':695700.0,
     'G1':G1,
-    'spice_file':'A'+'de432s.bsp',
+    'spice_file':A+'de432s.bsp',
     'deorbit_altitude':2*695700.0
 
 }
@@ -35,7 +35,7 @@ earth={
     'rhos': atm[:,1]*10**8, # kg/km³
     'atm_rot_vector':np.array([0.0,0.0,72.9211e-6]), #rad/s
     'deorbit_altitude':100,
-    'spice_file':'A'+'de432s.bsp'
+    'spice_file':A+'de432s.bsp'
 }
 moon={
     'name':'moon',
@@ -44,6 +44,6 @@ moon={
     'radius':1737.1,
     'Orbit_T':29*day2sec+12*3600.0+44*60.0+2.8,
     'dist2earth':384400.0,
-    'spice_file':'A'+'de432s.bsp'
+    'spice_file':A+'de432s.bsp'
 }
 moon['orbit_w']=2*np.pi/moon['Orbit_T']

@@ -23,7 +23,7 @@ if __name__ == '__main__':
 	mass0=10.0 #kg
 
 	#initial state value
-	state0=[cb['radius']+1000,0.01,10.0,0.0,0.0,0.0,191031]
+	state0=[cb['radius']+1000,0.01,10.0,0.0,0.0,0.0]
 
 	op=OP(state0,tspan,dt,degres=True,coes=True,mass0=mass0,perts=perts)
 
