@@ -47,3 +47,9 @@ moon={
     'spice_file':A+'de432s.bsp'
 }
 moon['orbit_w']=2*np.pi/moon['Orbit_T']
+
+bodies={
+'earth':earth,
+'sun':sun,
+'moon':moon
+}
