@@ -292,7 +292,7 @@ class OrbitPropagator:
 
         print(time()-start)
 
-    def plot_coes(self,hours=False,days=False,show_plot=False,save_plot=False,title='COEs',figsize=(16,8),dpi=500,rel=True):
+    def plot_coes(self,hours=False,days=False,show_plot=False,save_plot=False,title='COEs',figsize=(20,12),dpi=500,rel=True):
         print('Ploting COEs ...')
 
         #create figure and axses
@@ -354,7 +354,8 @@ class OrbitPropagator:
         axs[1,2].grid(True)
         axs[1,2].set_xlabel(xlabel)
 
-        plt.subplots_adjust(wspace=0.5)
+        plt.subplots_adjust(wspace=0.3)
+        plt.subplots_adjust(hspace=0.4)
 
         if show_plot:
             plt.show()

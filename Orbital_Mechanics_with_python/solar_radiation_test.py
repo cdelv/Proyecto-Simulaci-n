@@ -47,10 +47,10 @@ if __name__ == '__main__':
         op0=OP(state0,tspan,dt,coes=True,degres=True,perts=perts,date0=date0,mass0=mass0,propagator='dopri5')
         op1=OP(state1,tspan,dt,coes=True,degres=True,perts=perts,date0=date0,mass0=mass0,propagator='dopri5')
 
-        op0.calculate_coes(parallel=False)
-        op0.plot_coes(days=True,show_plot=True,rel=True)
+        #op0.calculate_coes(parallel=False)
+        #op0.plot_coes(days=True,show_plot=True,rel=True,title='Orbita HJ_2A con SRP')
 
         op1.calculate_coes(parallel=False)
-        op1.plot_coes(days=True,show_plot=True,rel=True)
+        op1.plot_coes(days=True,show_plot=True,rel=True,title='Orbita satélite Molniya con SRP')
 
-        #_t.plot_n_orbits([op0.rs,op1.rs],labels=['HJ_2A','Molniya Orbit'],show_plot=True)
+        _t.plot_n_orbits([op0.rs,op1.rs],labels=['HJ_2A','Molniya Orbit'],show_plot=True,title='Orbita satélite Molniya y HJ-2A con SRP')

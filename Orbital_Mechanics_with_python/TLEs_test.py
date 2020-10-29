@@ -22,4 +22,4 @@ if __name__ == '__main__':
 	op2=OP(t.tle2coes('HJ-2A.txt'),tspan,dt,coes=True,degres=False)
 	
 
-	t.plot_n_orbits([op0.rs,op1.rs,op2.rs],labels=['ISS','COSMOS2251','HJ-2A'],show_plot=True)
+	t.plot_n_orbits([op0.rs,op1.rs,op2.rs],labels=['ISS','COSMOS2251','HJ-2A'],show_plot=True,title='Orbita de satélites por TLEs')

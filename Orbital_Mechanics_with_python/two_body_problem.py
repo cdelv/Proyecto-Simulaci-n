@@ -2,6 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy.integrate import ode
 from mpl_toolkits.mplot3d import Axes3D
+plt.style.use('dark_background')
 
 def plot(r):
     #3D plot
@@ -9,8 +10,8 @@ def plot(r):
     ax=fig.add_subplot(111,projection='3d')
     
     #plot trayectory and starting point
-    ax.plot(r[:,0],r[:,1],r[:,2],'k')
-    ax.plot([r[0,0]],[r[0,1]],[r[0,2]],'ko')
+    ax.plot(r[:,0],r[:,1],r[:,2],'k',zorder=10)
+    ax.plot([r[0,0]],[r[0,1]],[r[0,2]],'ko',zorder=10)
     
     r_plot=earth_radius
     
@@ -19,7 +20,7 @@ def plot(r):
     _x=r_plot*np.cos(_u)*np.sin(_v)
     _y=r_plot*np.sin(_u)*np.sin(_v)
     _z=r_plot*np.cos(_v)
-    ax.plot_surface(_x,_y,_z,cmap='Blues')
+    ax.plot_surface(_x,_y,_z,cmap='Blues',zorder=5)
     
     l=r_plot*2.0
     x,y,z=[[0,0,0],[0,0,0],[0,0,0]]

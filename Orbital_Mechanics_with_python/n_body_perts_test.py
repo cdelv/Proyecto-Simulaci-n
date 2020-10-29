@@ -26,7 +26,7 @@ date0='2020-02-23'
 if __name__ == '__main__':
 
         #initial conditions
-        iss_coes=_t.tle2coes('HJ-2A.txt')
+        iss_coes=_t.tle2coes('iss.txt')
 
         state0=[42164.0,0.001,0.0,0.0,0.0,0.0]
 
@@ -41,10 +41,10 @@ if __name__ == '__main__':
         op_ISS=OP(iss_coes,tspan,dt,coes=True,degres=True,perts=perts,date0=date0,propagator='dopri5')
 
         op_ISS.calculate_coes(parallel=False)
-        op_ISS.plot_coes(days=True,show_plot=False)
+        op_ISS.plot_coes(days=True,show_plot=False,title='Coes ISS perturbación de la luna')
 
         op0.calculate_coes(parallel=False)
-        op0.plot_coes(days=True,show_plot=False)
+        op0.plot_coes(days=True,show_plot=False,title='Coes geostacionario perturbación de la luna')
 
         rs_m=np.array(op0.perts['n_bodies'][0]['states'][:,:3],dtype=object)
 
