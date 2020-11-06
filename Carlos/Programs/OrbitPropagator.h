@@ -7,12 +7,13 @@ class OrbitPropagator{
  private:
   vector3D r, v, a;
   double Tmax=0, dt=0;
+  bool coes, deg;
 
  public:
   std::string file="OP";
   
   template <typename T>
-  void inicie(std::vector <double> state0, double tspan, double DT,std::string name,const  T &CB);
+  void inicie(std::vector <double> &state0, double tspan, double DT,std::string name,const  T &CB, bool COES, bool DEG);
   template <typename T>
   void propagate_orbit(const T &CB);
   template <typename T>
@@ -28,10 +29,24 @@ class OrbitPropagator{
 //-------------------------Implementar funciones------------------------------
 
 template <typename T>
-void OrbitPropagator::inicie(std::vector <double> state0, double tspan, double DT,std::string name,const T &CB)
+void OrbitPropagator::inicie(std::vector <double> &state0, double tspan, double DT,std::string name,const T &CB, bool COES, bool DEG)
 {
-  r.cargue(state0[0],state0[1],state0[2]);
-  v.cargue(state0[3],state0[4],state0[5]);
+  coes=COES;
+  deg=DEG;
+  
+  if (coes)
+    {
+      std::vector <double> state(6,0);
+      state=coes2rv(state0,deg,CB);
+      r.cargue(state[0],state[1],state[2]);
+      v.cargue(state[3],state[4],state[5]);
+    }
+  else{
+    r.cargue(state0[0],state0[1],state0[2]);
+    v.cargue(state0[3],state0[4],state0[5]);
+  }
+
+  std::cout << r.x() <<"\t"<< r.y() <<"\t"<< r.z() << std::endl;
   Tmax=tspan; dt=DT;
   file=name;
   propagate_orbit(CB);
@@ -40,7 +55,7 @@ template <typename T>
 void OrbitPropagator::CalculeAceleracion(const T &CB){
  BorreAceleracion();
  double aux=-CB.mu*std::pow(norma2(r),-1.5);
-
+ 
  a+=aux*r;
 }
 void OrbitPropagator::Mueva_r(double t, double coeficiente){
@@ -74,9 +89,7 @@ double coeficiente2=(1-2*(X+E));
     CalculeAceleracion(CB);   Mueva_v(dt,coeficiente1);
     Mueva_r(dt,E);
     
-    fout << r.x() <<"\t"<< r.y() <<"\t"<< r.z() <<"\t"
-	 << v.x() <<"\t"<< v.y() <<"\t"<< v.z() <<"\t"
-	 << t << std::endl;
+    fout << r.x() <<"\t"<< r.y() <<"\t"<< r.z() << std::endl;
     }
   fout.close();
 }

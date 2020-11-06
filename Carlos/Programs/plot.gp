@@ -1,5 +1,6 @@
-r = 695700
-R = 695701
+r = 6378
+R = 6379
+set title 'N orbits'
 #color definitions
 set border lw 1.5
 set style line 1 lc rgb '#000000' lt 1 lw 0.5
@@ -20,5 +21,5 @@ set isosamples 25
 set hidden3d
 #since we are using Cartesian coordinates, we don't want this
 #set mapping spherical
-splot   r*cos(v)*cos(u),r*cos(v)*sin(u),r*sin(v) with lines linestyle 2, 'OP.dat' u 1:2:3 w l lw 5 lc 5, 'OP1.dat' u 1:2:3 w l lw 5 lc 10
+splot   r*cos(v)*cos(u),r*cos(v)*sin(u),r*sin(v) with lines linestyle 2,	  'world_110m.txt' u (R*cos($1)*cos($2)):(R*sin($1)*cos($2)):(R*sin($2)) w l lw 3 lc rgb 'black', 'OP.dat' u 1:2:3 w l lw 5 lc 5
 pause mouse
