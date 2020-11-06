@@ -1,5 +1,6 @@
 *.out
 *.x
+*.dat
 *.o
 *~
 pyc*
