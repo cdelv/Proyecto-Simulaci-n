@@ -3,6 +3,7 @@
 #include "master.h"
 
 const double d2r=M_PI/180;
+const double r2d=180/M_PI;
 
 
 template <typename T>
@@ -13,6 +14,8 @@ double ecc_anomaly(double ta, double e, std::string method);
 double true_anomaly(double E,double e);
 template <typename T>
 std::vector<double> tlecoes(std::string file, const T &cb);
+template <typename T>
+std::vector <double> rv2coes(std::vector <double> state,const T &CB,bool deg,bool plot);
 
 //--------------------------implementar funciones----------------
 template <typename T>
@@ -246,3 +249,26 @@ std::vector<double> tlecoes(std::string file, const T &cb)
   std::vector <double> coes {a,e,i,ta,aop,raan};
   return coes;
 }
+template <typename T>
+std::vector <double> rv2coes(std::vector <double> state,const T &CB,bool deg,bool plot)
+{
+  double mu=CB.mu; double et=0; double s [6]; double elts[SPICE_OSCLTX_NELTS];
+
+  for(int i=0; i<6; i++)
+    s[i]=state[i];
+
+  oscltx_c(s,et,mu,elts); //SPICE FUNCTION:calculate orbital elements for given state
+  //these is the output rp,e,i,raan,aop,ma,t0,mu,ta,a,T; in rads
+  
+  std::vector <double> coes{elts[9],elts[1],elts[2],elts[8],elts[4],elts[3]};
+  if(deg)
+    {
+      coes[2]*=r2d;
+      coes[3]*=r2d;
+      coes[4]*=r2d;
+      coes[5]*=r2d;
+    }
+  return coes;
+}
+
+
