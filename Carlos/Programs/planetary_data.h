@@ -1,8 +1,9 @@
 //planetary_data.h
 #pragma once
+#include <cmath>
 
 const double G_meters=6.67408e-11;
-const double G=G_meters*10e-9;
+const double G=G_meters*std::pow(10,-9);
 
 class sun {
  private:

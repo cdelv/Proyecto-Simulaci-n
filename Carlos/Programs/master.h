@@ -4,6 +4,7 @@
 #include <fstream>
 #include <vector>
 #include <cmath>
+#include <sstream>
 
 #include "Vector.h"
 #include "planetary_data.h"

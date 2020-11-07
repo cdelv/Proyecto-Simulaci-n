@@ -46,7 +46,6 @@ void OrbitPropagator::inicie(std::vector <double> &state0, double tspan, double 
     v.cargue(state0[3],state0[4],state0[5]);
   }
 
-  std::cout << r.x() <<"\t"<< r.y() <<"\t"<< r.z() << std::endl;
   Tmax=tspan; dt=DT;
   file=name;
   propagate_orbit(CB);

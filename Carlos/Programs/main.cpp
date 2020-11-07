@@ -21,6 +21,7 @@ int main(void)
 
   //parametros cuando se tienen coes
   std::vector <double> state0{r0,0.0006189,51.6393,0.0,234.1955,105.6372};
+  std::vector <double> state1(6,0);
 
   bool coes=true; //dice si los datos iniaciales están en coes o en velocidad y posición
   bool deg=true; //dice si los datos estan en grados o radianes
@@ -33,9 +34,13 @@ int main(void)
   bool save=false; //guarda la gráfica
   
  //--------------------------------------------------------------
+
+  state1= tlecoes("iss.txt",cb);
+
+
   
 //OP[N](condiciones iniciales, tmax, dt, "donde se guardan los datos", cuerpo central, coes, deg)
-  OP[0].inicie(state0,tspan,dt,"OP",cb,coes,deg);
+  OP[0].inicie(state1,tspan,dt,"OP",cb,coes,deg);
 
 //Plot_orbit(el vector de propagadores,cuerpo central ,"título", save);
   Plot_orbit(OP,cb,"N orbits", save);

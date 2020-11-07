@@ -10,6 +10,9 @@ void Plot_orbit(std::vector<OrbitPropagator> &OP,const T &cb, std::string title,
 template <typename T>
 std::vector<double> coes2rv(std::vector<double> &coes, bool deg, const T& cb);
 double ecc_anomaly(double ta, double e, std::string method);
+double true_anomaly(double E,double e);
+template <typename T>
+std::vector<double> tlecoes(std::string file, const T &cb);
 
 //--------------------------implementar funciones----------------
 template <typename T>
@@ -117,7 +120,6 @@ std::vector<double> coes2rv(std::vector<double> &coes, bool deg, const T &cb)
       aop*=d2r;
       raan*=d2r;
     }
-  std::cout <<"a "<<a<<" e "<<e<<" i "<<i<<" ta "<<ta<<" aop "<<aop<<" raan "<<raan<<std::endl;
   
   E=ecc_anomaly(ta,e,"tae"); //calcula la anomalía con newton rapshon
   
@@ -127,10 +129,6 @@ std::vector<double> coes2rv(std::vector<double> &coes, bool deg, const T &cb)
   rxp=r_norm*std::cos(ta);  vxp=r_norm*std::sin(E)*std::sqrt(cb.mu*a)/r_norm;
   ryp=r_norm*std::sin(ta);  vyp=std::cos(E)*std::sqrt(1-e*e)*std::sqrt(cb.mu*a)/r_norm;
   rzp=0;                    vzp=0;
-  std::cout <<"pxr "<<rxp<<std::endl;
-  std::cout <<"pyr "<<ryp<<std::endl;
-  std::cout <<"pxv "<<vxp<<std::endl;
-  std::cout <<"pyv "<<vyp<<std::endl;
  
   std::vector<double> rperif{rxp,ryp,rzp};
   std::vector<double> vperif{vxp,vyp,vzp};
@@ -142,9 +140,6 @@ std::vector<double> coes2rv(std::vector<double> &coes, bool deg, const T &cb)
 	  std::sin(i)*std::cos(aop)};
   row[2]={std::sin(raan)*std::sin(i),-std::cos(raan)*std::sin(i),std::cos(i)};
 
-    for(int jj=0; jj<3; jj++)
-      for(int ii=0; ii<3; ii++)
-	std::cout <<"vperif"<<jj<<","<<ii<<"="<<row[jj][ii]<<std::endl;
 
   //multiclicación de la matriz de rotacion TRANSPUESTA por rperif y vperif
   //para calcular r y v en el sistema inercial del cuerpo central
@@ -155,19 +150,9 @@ std::vector<double> coes2rv(std::vector<double> &coes, bool deg, const T &cb)
 
     
     for(int ii=0; ii<3; ii++)
-    for(int jj=0; jj<3; jj++)
-    rv[ii+3]+=vperif[jj]*row[jj][ii];
-  
-  
-    /*for(int ii=0; ii<3; ii++)
-    for(int jj=0; jj<3; jj++)
-      rv[ii]+=row[ii][jj]*rperif[jj];
-  for(int ii=0; ii<3; ii++)
-    for(int jj=0; jj<3; jj++)
-    rv[ii+3]+=row[ii][jj]*vperif[jj];*/
+      for(int jj=0; jj<3; jj++)
+	rv[ii+3]+=vperif[jj]*row[jj][ii];
 
-  for(int jj=0; jj<6; jj++)
-    std::cout <<"rv["<<jj<<"]="<<rv[jj]<<std::endl;
   return rv;
 }
 double ecc_anomaly(double ta, double e, std::string method)
@@ -196,6 +181,7 @@ double ecc_anomaly(double ta, double e, std::string method)
 	  E1=E0-ratio;
 	  E0=E1;
 	    }
+	return 0;
       }
     }
   
@@ -208,4 +194,55 @@ double ecc_anomaly(double ta, double e, std::string method)
   //did not converge
   std::cout << "did not converge" << std::endl;
   return 0;
+}
+
+double true_anomaly(double E,double e)
+{
+return 2*std::atan(std::sqrt((1+e)/(1-e))*std::tan(E/2.0));
+}
+
+template <typename T>
+std::vector<double> tlecoes(std::string file, const T &cb)
+{
+  double a,e,i,ta,aop,raan,P,Me,F,E;
+  std::string line1, line2, line3;
+  std::ifstream data;
+  data.open(file);
+
+  std::getline(data,line1);
+  std::getline(data,line2);
+  std::getline(data,line3);
+  
+  std::vector<std::string>Line2;
+  std::istringstream iss(line2); 
+  for(std::string s; iss >> s; ) 
+    Line2.push_back(s); 
+  
+  std::vector<std::string>Line3;
+  std::istringstream jss(line3); 
+  for(std::string s; jss >> s; ) 
+    Line3.push_back(s);
+  
+  stringstream geeka(Line3[2]); //i
+  geeka >> i;
+  stringstream geekb(Line3[3]); //raan 
+  geekb >> raan; 
+  stringstream geekc("0."+Line3[4]); //e
+  geekc >> e; 
+  stringstream geekd(Line3[5]); //aop 
+  geekd >> aop; 
+  stringstream geeke(Line3[6]); //Anomalía media 
+  geeke >> Me; 
+  stringstream geekf(Line3[7]); //frecuencia revs/dia
+  geekf >> F;
+  P=1/F*24*3600; //segundos
+  
+  a=std::cbrt((P*P*cb.mu)/(4*std::pow(M_PI,2))); //a
+
+  E=ecc_anomaly(Me, e, "newton");
+  
+  ta=true_anomaly(E, e);
+
+  std::vector <double> coes {a,e,i,ta,aop,raan};
+  return coes;
 }
