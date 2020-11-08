@@ -6,20 +6,22 @@
 class OrbitPropagator{
  private:
   vector3D r, v, a;
-  double Tmax=0, dt=0, masa=0;
+  double Tmax=0, dt=0, masa=0, dmdt=0;
   bool coes, deg;
+  int tcuadro=1;
 
  public:
   std::string file="OP";
   
   template <typename T>
-  void inicie(std::vector <double> &state0, double tspan, double DT,std::string name,const  T &CB, bool COES, bool DEG, perturbations &perts,double m);
+  void inicie(std::vector <double> &state0, double tspan, double DT,std::string name,const  T &CB, bool COES, bool DEG, perturbations &perts,double m,int resol);
   template <typename T>
   void propagate_orbit(const T &CB,perturbations &perts);
   template <typename T>
   void CalculeAceleracion(const T &CB,perturbations &perts);
   void Mueva_r(double t, double coeficiente);
   void Mueva_v(double t, double coeficiente);
+  void Mueva_m(double t, double coeficiente);
   void BorreAceleracion(void){a.cargue(0,0,0);};
   double Getx(void){return r.x();};                                                                                           
   double Gety(void){return r.y();};
@@ -29,11 +31,14 @@ class OrbitPropagator{
 //-------------------------Implementar funciones------------------------------
 
 template <typename T>
-void OrbitPropagator::inicie(std::vector <double> &state0, double tspan, double DT,std::string name,const T &CB, bool COES, bool DEG,perturbations &perts,double m)
+void OrbitPropagator::inicie(std::vector <double> &state0, double tspan, double DT,std::string name,const T &CB, bool COES, bool DEG,perturbations &perts,double m,int resol)
 {
+  if(perts.thrust!=0 and perts.isp!=0){
+    dmdt=perts.thrust/(perts.isp*CB.g0);}
   coes=COES;
   deg=DEG;
   masa=m;
+  tcuadro=resol;
   
   if (coes)
     {
@@ -81,6 +86,14 @@ void OrbitPropagator::CalculeAceleracion(const T &CB,perturbations &perts){
 
      drag=-1*v_rel*0.5*rho*perts.Cd*perts.A*vv/masa;
    }
+ if(perts.thrust!=0 and masa>1)
+   {
+     if(masa<=1)
+       {
+	 std::cout <<"se acabó el combustible" <<std::endl;
+       }
+     a+=perts.thrust_direction*v*perts.thrust/(masa*1000); //km/s² 
+   }
 }
 void OrbitPropagator::Mueva_r(double t, double coeficiente){
   r+=v*t*coeficiente;
@@ -89,31 +102,41 @@ void OrbitPropagator::Mueva_r(double t, double coeficiente){
 void OrbitPropagator::Mueva_v(double t, double coeficiente){
   v+=a*t*coeficiente;
 }
+void OrbitPropagator::Mueva_m(double t, double coeficiente){
+  if(masa>1)
+  masa+=dmdt*t*coeficiente;
+}
 template <typename T>
 void OrbitPropagator::propagate_orbit(const T &CB,perturbations &perts)
 {
-double E=0.1786178958448091e00;
-double L=-0.2123418310626054e0;
-double X=-0.6626458266981849e-1;
-double coeficiente1=(1-2*L)/2;
-double coeficiente2=(1-2*(X+E));
+  double E=0.1786178958448091e00;
+  double L=-0.2123418310626054e0;
+  double X=-0.6626458266981849e-1;
+  double coeficiente1=(1-2*L)/2;
+  double coeficiente2=(1-2*(X+E));
+  int cuenta=0;
  
  std::ofstream fout;   //Salida de la orbita.                                                                                                                   
  fout.open(file+".dat");
 
-  for(double t=0; t<=Tmax; t+=dt)
+ for(double t=0; t<=Tmax; t+=dt, cuenta++)
     {
     Mueva_r(dt,E);
+    Mueva_m(dt,E);
     CalculeAceleracion(CB,perts);   Mueva_v(dt,coeficiente1);
     Mueva_r(dt,X);
+    Mueva_m(dt,X);
     CalculeAceleracion(CB,perts);   Mueva_v(dt,L);
     Mueva_r(dt,coeficiente2);
     CalculeAceleracion(CB,perts);   Mueva_v(dt,L);
     Mueva_r(dt,X);
+    Mueva_m(dt,X);
     CalculeAceleracion(CB,perts);   Mueva_v(dt,coeficiente1);
     Mueva_r(dt,E);
-    
-    fout << r.x() <<"\t"<< r.y() <<"\t"<< r.z()<<"\t"<< v.x() <<"\t"<< v.y() <<"\t"<< v.z()<<"\t"<< t << std::endl;
+    Mueva_m(dt,E);
+    if(cuenta%tcuadro==0){
+      fout << r.x() <<"\t"<< r.y() <<"\t"<< r.z()<<"\t"<< v.x() <<"\t"<< v.y() <<"\t"<< v.z()<<"\t"<< t << std::endl;
+      cuenta=0;}
     }
   fout.close();
 }

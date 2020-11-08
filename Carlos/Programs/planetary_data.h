@@ -22,6 +22,7 @@ class earth {
   double mu=5.972e24*G;
   double radius=6378.0;
   double J2=1.082635854e-3;
+  double g0=9.81;
   std::vector<double> atmrotvector{0,0,72.9211e-6};
   std::vector<double> zs{63.096,251.189,1000}; //km
   std::vector<double> rhos{2.059e5,5.909e-2,3.561e-6};// # kg/km³
@@ -39,7 +40,7 @@ class perturbations {
   //n_bodies=[];
   double Cd=0;
   double A=0;
-  double trhust=0;
+  double thrust=0;
   double thrust_direction=0;
   double isp=0;
   double CR=0;

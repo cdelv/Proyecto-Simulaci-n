@@ -9,16 +9,18 @@ int main(void)
   int N=2;                    //numero de orbitas
   earth cb;                  //cuerpo central
   perturbations perts;      //diccionario de perturbaciones
-  double tspan=3600*24*1;  //tmax en segundos
-  double dt=1;            // paso de tiempo en segundos
+  double tspan=3600*24*5;  //tmax en segundos
+  double dt=10;            // paso de tiempo en segundos
   bool coes=true;        //si condiciones iniciales son coes
   bool deg=true;        //si están en grados
-  double masa=10;      //kg
+  double masa=50;      //kg
+  int tcuadro=10;    //cada cuanto imprime datos
  
   //------------------definir las perturbaciones----------------
   
   //perts.J2=true;
-  perts.aero=true; perts.Cd=2.2; perts.A=std::pow(0.001,2); //Cd=coeficiente de fricción A=area en km²
+  //perts.aero=true; perts.Cd=2.2; perts.A=std::pow(0.001,2); //Cd=coeficiente de fricción A=area en km²
+  perts.thrust=0.327; perts.isp=4300; perts.thrust_direction=1;
   
   //------------------definir el propagador---------------------
   
@@ -45,8 +47,8 @@ int main(void)
   //si hay varios propagadores el nombre "OP" debe ser distinto
   //es el archivo .dat donde se guardan los datos
   
-  OP[0].inicie(state0,tspan,dt,"OP",cb,coes,deg,perts,masa);
-  OP[1].inicie(state1,tspan,dt,"OP1",cb,coes,deg,perts,masa);
+  OP[0].inicie(state0,tspan,dt,"OP",cb,coes,deg,perts,masa,tcuadro);
+  OP[1].inicie(state1,tspan,dt,"OP1",cb,coes,deg,perts,masa,tcuadro);
 
   //-----------------------pintar las orbitas--------------------
 
