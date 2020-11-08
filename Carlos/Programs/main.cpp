@@ -2,19 +2,20 @@
 
 #include "master.h"
 
+
 int main(void)
 {
   //----------------parametros del propagador--------------------
-  
+  StopC sc;                    //stop conditions
   int N=2;                    //numero de orbitas
   earth cb;                  //cuerpo central
   perturbations perts;      //diccionario de perturbaciones
-  double tspan=3600*24*5;  //tmax en segundos
-  double dt=10;            // paso de tiempo en segundos
+  double tspan=3600*24*20;  //tmax en segundos
+  double dt=10;           // paso de tiempo en segundos
   bool coes=true;        //si condiciones iniciales son coes
   bool deg=true;        //si están en grados
-  double masa=50;      //kg
-  int tcuadro=10;    //cada cuanto imprime datos
+  double masa=100;      //kg
+  int tcuadro=10;     //cada cuanto imprime datos
  
   //------------------definir las perturbaciones----------------
   
@@ -34,6 +35,10 @@ int main(void)
   double r0=cb.radius+414;
   std::vector <double> state0{r0,0.0006189,51.6393,0.0,234.1955,105.6372};
  std::vector <double>state1= tlecoes("HJ-2A.txt",cb); //sacar condiciones iniciales de los TLE
+
+ //------------------definir las stop conditions----------------
+
+ sc.max_alt=1000; sc.min_alt=0; sc.no=true; //mas condiciones es necesario implementarlas, no=true es para desactivarlas
   
  //------------------parametros de Plot_orbit--------------------
   
@@ -47,8 +52,8 @@ int main(void)
   //si hay varios propagadores el nombre "OP" debe ser distinto
   //es el archivo .dat donde se guardan los datos
   
-  OP[0].inicie(state0,tspan,dt,"OP",cb,coes,deg,perts,masa,tcuadro);
-  OP[1].inicie(state1,tspan,dt,"OP1",cb,coes,deg,perts,masa,tcuadro);
+  OP[0].inicie(state0,tspan,dt,"OP",cb,coes,deg,perts,masa,tcuadro,sc);
+  OP[1].inicie(state1,tspan,dt,"OP1",cb,coes,deg,perts,masa,tcuadro,sc);
 
   //-----------------------pintar las orbitas--------------------
 

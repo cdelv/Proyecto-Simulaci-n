@@ -48,4 +48,13 @@ class perturbations {
   double C20=0;
   double mu=0;
 };
+class StopC  //definir las condiciones para que apague el motor
+{
+private:
+
+public:
+  double max_alt=2000;
+  double min_alt=0;
+  bool no=false;
+};
 
