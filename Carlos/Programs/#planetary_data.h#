@@ -1,7 +1,0 @@
-#include "master.h"
-
-const double G=1;
-
-
-
-
