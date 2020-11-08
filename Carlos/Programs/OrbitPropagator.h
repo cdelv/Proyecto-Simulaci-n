@@ -6,7 +6,7 @@
 class OrbitPropagator{
  private:
   vector3D r, v, a;
-  double Tmax=0, dt=0, masa=0, dmdt=0, max_alt=0, min_alt=0;
+  double Tmax=0, dt=0, masa=1, dmdt=0, max_alt=0, min_alt=0;
   bool coes, deg, stop;
   int tcuadro=1;
 
@@ -23,7 +23,7 @@ class OrbitPropagator{
   void Mueva_v(double t, double coeficiente);
   void Mueva_m(double t, double coeficiente);
   void BorreAceleracion(void){a.cargue(0,0,0);};
-  double Getx(void){return r.x();};                                                                                           
+  double Getx(void){return r.x();};                                                                      
   double Gety(void){return r.y();};
   double Getz(void){return r.z();};
   template <typename T>
@@ -37,8 +37,11 @@ class OrbitPropagator{
 template <typename T>
 void OrbitPropagator::inicie(std::vector <double> &state0, double tspan, double DT,std::string name,const T &CB, bool COES, bool DEG,perturbations &perts,double m,int resol, StopC &sc)
 {
-  if(perts.thrust!=0 and perts.isp!=0){
-    dmdt=perts.thrust/(perts.isp*CB.g0);}
+  if(perts.isp==0)
+    dmdt=0;
+  else
+    dmdt=perts.thrust/(perts.isp*CB.g0);
+  
   max_alt=sc.max_alt; min_alt=sc.min_alt;
   coes=COES;
   deg=DEG;
@@ -92,15 +95,11 @@ void OrbitPropagator::CalculeAceleracion(const T &CB,perturbations &perts){
 
      drag=-1*v_rel*0.5*rho*perts.Cd*perts.A*vv/masa;
    }
- if(perts.thrust!=0 and masa>1)
-   {
+
      if(max_alt>alt(CB) and  min_alt<alt(CB) || stop) //condiciones para detenerse
        {
 	 a+=perts.thrust_direction*v*perts.thrust/(masa*1000); //km/s² 
        }
-   }
- if(masa<1)
-     std::cout <<"se acabó el combustible" <<std::endl;
 }
 
 void OrbitPropagator::Mueva_r(double t, double coeficiente){
@@ -160,7 +159,7 @@ bool OrbitPropagator::check_deorbit(T &CB)
 {
   double z=alt(CB);
   if (z<CB.deorbit_altitude){
-    std::cout<<"Spacecraft has deorbited";
+    std::cout<<"Spacecraft "<<file<<" has deorbited";
     return true;
   }
   return false;

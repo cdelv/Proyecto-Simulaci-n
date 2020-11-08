@@ -16,7 +16,7 @@ def plot_n_orbits(rs,labels,cb=pd.EARTH, show_plot=False,save_plot=False,title='
     
     n=0
     for r in rs:
-        ax.plot(r[:,0],r[:,1],r[:,2],label=labels[n],zorder=5)
+        ax.plot(r[:,0],r[:,1],r[:,2],label=labels[n],zorder=0)
         #ax.plot([r[0,0]],[r[0,1]],[r[0,2]],label='Initial position')
         n+=1
     
@@ -25,7 +25,7 @@ def plot_n_orbits(rs,labels,cb=pd.EARTH, show_plot=False,save_plot=False,title='
     _x=cb['radius']*np.cos(_u)*np.sin(_v)
     _y=cb['radius']*np.sin(_u)*np.sin(_v)
     _z=cb['radius']*np.cos(_v)
-    ax.plot_surface(_x,_y,_z,cmap='Blues',zorder=0)
+    ax.plot_surface(_x,_y,_z,cmap='Blues',zorder=-1)
     
     l=cb['radius']*2.0
     x,y,z=[[0,0,0],[0,0,0],[0,0,0]]
@@ -51,64 +51,61 @@ def plot_n_orbits(rs,labels,cb=pd.EARTH, show_plot=False,save_plot=False,title='
     if save_plot:
         plt.savefig(title+'.png',dpi=200)
 
-def plot_coes(hours=False,days=False,show_plot=False,save_plot=False,title='COEs',figsize=(20,12),dpi=500,rel=True):
+def plot_coes(coes,hours=False,days=False,show_plot=False,save_plot=False,title='COEs'):
         print('Ploting COEs ...')
-
+        ts=coes[:,6]
         #create figure and axses
-        fig,axs=plt.subplots(nrows=2,ncols=3,figsize=figsize)
+        fig,axs=plt.subplots(nrows=2,ncols=3,figsize=(20,12))
 
         #figure titles
         fig.suptitle(title,fontsize=20)
 
         #x axis
         if hours: 
-            ts=self.ts/3600
+            ts=ts/3600
             xlabel='Time (hours)'
         elif days:
-            ts=self.ts/3600/24
+            ts=ts/3600/24
             xlabel='Time (days)'
         else:
-            ts=self.ts
+            ts=ts
             xlabel='Time (seconds)'
 
         #check to plote relative coes
-        if rel:
-            coes=self.coes_rel
-        else:
-            coes=self.coes
+
 
         #plot true anomaly
-        axs[0,0].plot(ts,self.coes[:,3])
+        axs[0,0].plot(ts,coes[:,3])
         axs[0,0].set_title('True anomaly vs.Time')
         axs[0,0].grid(True)
         axs[0,0].set_ylabel('Angle (degrees)')
 
         #plot semi major axis
-        axs[1,0].plot(ts,self.coes[:,0])
+        axs[1,0].plot(ts,coes[:,0])
         axs[1,0].set_title('Semi Major Axis vs.Time')
         axs[1,0].grid(True)
         axs[1,0].set_ylabel('Semi Major Axis (km)')
         axs[1,0].set_xlabel(xlabel)
 
         #plot eccentricity
-        axs[0,1].plot(ts,self.coes[:,1])
+        axs[0,1].plot(ts,coes[:,1])
         axs[0,1].set_title('Eccentricity vs.Time')
         axs[0,1].grid(True)
 
         #plot argument of periage
-        axs[0,2].plot(ts,self.coes[:,4])
+        axs[0,2].plot(ts,coes[:,4])
         axs[0,2].set_title('Argument of Periapse vs.Time')
         axs[0,2].grid(True)
 
         #plot inclination
-        axs[1,1].plot(ts,self.coes[:,2])
+        axs[1,1].plot(ts,coes[:,2])
         axs[1,1].set_title('Inclination vs.Time')
         axs[1,1].grid(True)
         axs[1,1].set_ylabel('Angle (degrees)')
         axs[1,1].set_xlabel(xlabel)
 
         #plot RAAN
-        axs[1,2].plot(ts,self.coes[:,5])
+        axs[1,2].plot(ts,coes[:,5])
         axs[1,2].set_title('RAAN vs.Time')
         axs[1,2].grid(True)
         axs[1,2].set_xlabel(xlabel)
@@ -119,7 +116,7 @@ def plot_coes(hours=False,days=False,show_plot=False,save_plot=False,title='COEs
         if show_plot:
             plt.show()
         if save_plot:
-            plt.savefig(title+'.png',dpi=dpi)
+            plt.savefig(title+'.png',dpi=500)
 
 def plot_apoapse_periapse(self,hours=False,days=False,show_plot=False,save_plot=False,title='Apoapse and Periapse',dpi=500):
         #create figure

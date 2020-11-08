@@ -1,6 +1,7 @@
 CXX = g++
-CXXFLAGS = -std=c++17 -O2
+CXXFLAGS = -std=c++17 -O3 -g
 SPICE = -I/home/wind/naif/cspice/include /home/wind/naif/cspice/lib/cspice.a -lm
+SANITFLAGS = -fsanitize=address -fsanitize=leak -fsanitize=undefined
 
 
 

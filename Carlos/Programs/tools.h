@@ -5,6 +5,7 @@
 const double d2r=M_PI/180;
 const double r2d=180/M_PI;
 
+//---------------------declarar funciones-----------------------
 
 template <typename T>
 void Plot_orbit_gnuplot(std::vector<OrbitPropagator> &OP,const T &cb, std::string title, bool save);
@@ -17,13 +18,18 @@ std::vector<double> tlecoes(std::string file, const T &cb);
 template <typename T>
 std::vector <double> rv2coes(std::vector <double> state,const T &CB,bool deg);
 template <typename T>
-void Plot_orbit(std::vector<OrbitPropagator>&OP,T &cb,bool show,bool save,std:: string title,std::vector<std::string>labels);
+void Plot_orbit(std::vector<OrbitPropagator>&OP,T &cb,bool show,bool save,std:: string title,std::vector<std::string> &labels);
 template <typename T>
 double calc_atm_density(double z, T &CB);
 template <typename T>
 std::vector <double> find_rho_z(double z, T &CB);
+template <typename T>
+void Plot_coes(std::vector<OrbitPropagator> &OP,T &CB,bool show, bool save,std::vector<std::string>labels, bool hours, bool days);
+template <typename T>
+void  calculate_coes(std::vector <OrbitPropagator> &OP,T &CB);
 
 //--------------------------implementar funciones----------------
+
 template <typename T>
 void Plot_orbit_gnuplot(std::vector<OrbitPropagator> &OP,const T &cb, std::string title, bool save)
 {
@@ -64,10 +70,10 @@ void Plot_orbit_gnuplot(std::vector<OrbitPropagator> &OP,const T &cb, std::strin
      out<<"#since we are using Cartesian coordinates, we don't want this"<<std::endl;
      out<<"#set mapping spherical"<<std::endl;
      out<<"splot \
-  r*cos(v)*cos(u),r*cos(v)*sin(u),r*sin(v) with lines linestyle 2,	\
-  'world_110m.txt' u (R*cos($1)*cos($2)):(R*sin($1)*cos($2)):(R*sin($2)) w l lw 3 lc rgb 'black'";
+  r*cos(v)*cos(u),r*cos(v)*sin(u),r*sin(v) with lines linestyle 1,	\
+  'world_110m.txt' u (R*cos($1)*cos($2)):(R*sin($1)*cos($2)):(R*sin($2)) w l lw 2 lc rgb 'black'";
  for(auto i: OP){
-   out <<", '"<< i.file<<".dat' u 1:2:3 w l lw 5 lc "<<5+j*5;
+   out <<", '"<< i.file<<".dat' u 1:2:3 w l lw 3 lc "<<5+j*5;
    j+=1;
  }
  out<<std::endl;
@@ -99,9 +105,9 @@ void Plot_orbit_gnuplot(std::vector<OrbitPropagator> &OP,const T &cb, std::strin
      out<<"#since we are using Cartesian coordinates, we don't want this"<<std::endl;
      out<<"#set mapping spherical"<<std::endl;
      out<<"splot \
-  r*cos(v)*cos(u),r*cos(v)*sin(u),r*sin(v) with lines linestyle 2";
+  r*cos(v)*cos(u),r*cos(v)*sin(u),r*sin(v) with lines linestyle 1";
      for(auto i: OP){
-       out <<", '"<< i.file<<".dat' u 1:2:3 w l lw 5 lc "<<5+j*5;
+       out <<", '"<< i.file<<".dat' u 1:2:3 w l lw 3 lc "<<5+j*5;
        j+=1;
      }
      out<<std::endl;
@@ -277,7 +283,7 @@ std::vector <double> rv2coes(std::vector <double> state,const T &CB,bool deg)
   return coes;
 }
 template <typename T>
-void Plot_orbit(std::vector<OrbitPropagator>&OP,T &cb,bool show,bool save,std:: string title,std::vector<std::string>labels)
+void Plot_orbit(std::vector<OrbitPropagator>&OP,T &cb,bool show,bool save,std:: string title,std::vector<std::string> &labels)
   {
     int n=0;
     std::ofstream out;
@@ -302,6 +308,7 @@ void Plot_orbit(std::vector<OrbitPropagator>&OP,T &cb,bool show,bool save,std:: 
     out<<"if __name__ == '__main__':"<<std::endl;
     for(auto i: OP){
       out<<"\tdata"<<n<<"=np.loadtxt('"<<i.file<<".dat',delimiter='\t')"<<std::endl;
+      out<<"\tdata"<<n<<"=data"<<n<<"[:,:3]"<<std::endl;
       n+=1;
     }
     n=0;
@@ -349,4 +356,93 @@ std::vector <double> find_rho_z(double z, T &CB)
       }
   }
   return ret;
+}
+template <typename T>
+void Plot_coes(std::vector<OrbitPropagator> &OP,T &CB,bool show, bool save,std::vector<std::string>labels, bool hours, bool days)
+{
+  calculate_coes(OP,CB); //crea los archivos de coes
+  
+  std::string save_plot; std::string show_plot; std::string Hours; std::string Days;//parametros de la grafica
+  
+  int n=0;
+  std::ofstream out;
+  
+  if(save)
+    save_plot="True";
+  else
+    save_plot="False";
+  if(show)
+    show_plot="True";
+  else
+    show_plot="False";
+  if(hours)
+    Hours="True";
+  else
+    Hours="False";
+  if(days)
+    Days="True";
+  else
+    Days="False";
+  
+  for(auto i: OP){
+    std::string s0 = std::to_string(n);
+    out.open(s0+"plotcoes.py");
+    out<<"import numpy as np"<<std::endl;
+    out<<"import plotingfunctions as t"<<std::endl;
+    out<<"if __name__ == '__main__':"<<std::endl;
+    out<<"\tdata"<<n<<"=np.loadtxt('"<<i.file<<"coes.dat',delimiter='\t')"<<std::endl;
+    out<<"t.plot_coes(data"<<n<<",hours="<<Hours<<",days="<<Days<<",show_plot="<<show_plot<<",save_plot="<<
+      save_plot<<",title='"<<labels[n]<<" COEs')"<<std::endl;
+    n+=1;
+    out.close();
+  }
+  n=0;
+  for(auto i: OP)
+    {
+      std::string s0 = std::to_string(n);
+      std::string s1 = "python ";
+      std::string s2="plotcoes.py";
+      std::string S=s1+s0+s2;
+      system((S).c_str());
+      n+=1;
+    }
+}
+
+
+template <typename T>
+void  calculate_coes(std::vector <OrbitPropagator> &OP,T &CB)
+{
+  std::vector <double> coes (0,6);
+  std::vector <double> rv (7,0);
+  std::string line;
+
+  for(auto i: OP)
+    {
+      std::ofstream fout;   //Salida de los datos.                                                                                                                   
+      fout.open(i.file+"coes.dat");
+      
+      std::ifstream data;  //archivo que va a leer
+      data.open(i.file+".dat");
+      
+      while(std::getline(data,line))
+	{
+	  std::vector<std::string>Line;
+	  std::istringstream iss(line); 
+	  for(std::string s; iss >> s; ) 
+	    Line.push_back(s);
+      
+	  for(int i=0; i<7; i++) //copiar la linea de rv en un vector
+	    {
+	      stringstream geeka(Line[i]); 
+	      geeka >> rv[i];
+	    }
+	  coes=rv2coes(rv,CB,true); //el tamaño de rv no importa mientras los 6 primeros datos sean x,y,z,vx,vy,vz
+  
+	  for(auto j: coes)
+	    fout <<j<<"\t"; //estos son los coes
+	  fout<<rv[6]<<std::endl; //este es el tiempo
+	}
+       fout.close();
+       data.close();
+    }
 }
