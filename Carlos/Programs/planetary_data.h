@@ -1,10 +1,8 @@
 //planetary_data.h
-#pragma once
-#include <cmath>
+#include"master.h"
 
 const double G_meters=6.67408e-11;
 const double G=G_meters*std::pow(10,-9);
-
 class sun {
  private:
 
@@ -24,9 +22,9 @@ class earth {
   double mu=5.972e24*G;
   double radius=6378.0;
   double J2=1.082635854e-3;
-  //  'zs':atm[:,0], #km
-  // 'rhos': atm[:,1]*10**8, # kg/km³
-  // 'atm_rot_vector':np.array([0.0,0.0,72.9211e-6]), #rad/s
+  std::vector<double> atmrotvector{0,0,72.9211e-6};
+  std::vector<double> zs{63.096,251.189,1000}; //km
+  std::vector<double> rhos{2.059e5,5.909e-2,3.561e-6};// # kg/km³
   double deorbit_altitude=100;
   //'spice_file':A+'de432s.bsp'
 };

@@ -6,14 +6,14 @@
 class OrbitPropagator{
  private:
   vector3D r, v, a;
-  double Tmax=0, dt=0;
+  double Tmax=0, dt=0, masa=0;
   bool coes, deg;
 
  public:
   std::string file="OP";
   
   template <typename T>
-  void inicie(std::vector <double> &state0, double tspan, double DT,std::string name,const  T &CB, bool COES, bool DEG, perturbations &perts);
+  void inicie(std::vector <double> &state0, double tspan, double DT,std::string name,const  T &CB, bool COES, bool DEG, perturbations &perts,double m);
   template <typename T>
   void propagate_orbit(const T &CB,perturbations &perts);
   template <typename T>
@@ -29,10 +29,11 @@ class OrbitPropagator{
 //-------------------------Implementar funciones------------------------------
 
 template <typename T>
-void OrbitPropagator::inicie(std::vector <double> &state0, double tspan, double DT,std::string name,const T &CB, bool COES, bool DEG,perturbations &perts)
+void OrbitPropagator::inicie(std::vector <double> &state0, double tspan, double DT,std::string name,const T &CB, bool COES, bool DEG,perturbations &perts,double m)
 {
   coes=COES;
   deg=DEG;
+  masa=m;
   
   if (coes)
     {
@@ -67,6 +68,19 @@ void OrbitPropagator::CalculeAceleracion(const T &CB,perturbations &perts){
      vector3D a_j2; a_j2.cargue(tx,ty,tz);
      a+=aux*a_j2;
    }
+ if(perts.aero)
+   {
+     double r2=norma2(r);
+     double norm_r=std::sqrt(r2);
+     vector3D v_rel, drag, atmrot; double z, rho, vv;
+     z=norm_r-CB.radius;
+     rho=calc_atm_density(z,CB);
+     atmrot.cargue(CB.atmrotvector[0],CB.atmrotvector[1],CB.atmrotvector[2]);
+
+     v_rel=(v^atmrot); vv=std::sqrt(norma2(v_rel));
+
+     drag=-1*v_rel*0.5*rho*perts.Cd*perts.A*vv/masa;
+   }
 }
 void OrbitPropagator::Mueva_r(double t, double coeficiente){
   r+=v*t*coeficiente;
@@ -99,7 +113,7 @@ double coeficiente2=(1-2*(X+E));
     CalculeAceleracion(CB,perts);   Mueva_v(dt,coeficiente1);
     Mueva_r(dt,E);
     
-    fout << r.x() <<"\t"<< r.y() <<"\t"<< r.z() << std::endl;
+    fout << r.x() <<"\t"<< r.y() <<"\t"<< r.z()<<"\t"<< v.x() <<"\t"<< v.y() <<"\t"<< v.z()<<"\t"<< t << std::endl;
     }
   fout.close();
 }

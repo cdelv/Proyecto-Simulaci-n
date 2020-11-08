@@ -7,7 +7,7 @@ const double r2d=180/M_PI;
 
 
 template <typename T>
-void Plot_orbit(std::vector<OrbitPropagator> &OP,const T &cb, std::string title, bool save);
+void Plot_orbit_gnuplot(std::vector<OrbitPropagator> &OP,const T &cb, std::string title, bool save);
 template <typename T>
 std::vector<double> coes2rv(std::vector<double> &coes, bool deg, const T& cb);
 double ecc_anomaly(double ta, double e, std::string method);
@@ -15,11 +15,17 @@ double true_anomaly(double E,double e);
 template <typename T>
 std::vector<double> tlecoes(std::string file, const T &cb);
 template <typename T>
-std::vector <double> rv2coes(std::vector <double> state,const T &CB,bool deg,bool plot);
+std::vector <double> rv2coes(std::vector <double> state,const T &CB,bool deg);
+template <typename T>
+void Plot_orbit(std::vector<OrbitPropagator>&OP,T &cb,bool show,bool save,std:: string title,std::vector<std::string>labels);
+template <typename T>
+double calc_atm_density(double z, T &CB);
+template <typename T>
+std::vector <double> find_rho_z(double z, T &CB);
 
 //--------------------------implementar funciones----------------
 template <typename T>
-void Plot_orbit(std::vector<OrbitPropagator> &OP,const T &cb, std::string title, bool save)
+void Plot_orbit_gnuplot(std::vector<OrbitPropagator> &OP,const T &cb, std::string title, bool save)
 {
  double r=cb.radius;
  int t=r/1000;
@@ -250,7 +256,7 @@ std::vector<double> tlecoes(std::string file, const T &cb)
   return coes;
 }
 template <typename T>
-std::vector <double> rv2coes(std::vector <double> state,const T &CB,bool deg,bool plot)
+std::vector <double> rv2coes(std::vector <double> state,const T &CB,bool deg)
 {
   double mu=CB.mu; double et=0; double s [6]; double elts[SPICE_OSCLTX_NELTS];
 
@@ -270,5 +276,77 @@ std::vector <double> rv2coes(std::vector <double> state,const T &CB,bool deg,boo
     }
   return coes;
 }
+template <typename T>
+void Plot_orbit(std::vector<OrbitPropagator>&OP,T &cb,bool show,bool save,std:: string title,std::vector<std::string>labels)
+  {
+    int n=0;
+    std::ofstream out;
+    std::string save_plot;
+    std::string show_plot;
 
-
+    if(save)
+      save_plot="True";
+    else
+      save_plot="False";
+    if(show)
+      show_plot="True";
+    else
+      show_plot="False";
+    
+    
+    out.open("plot.py");
+    out<<"import numpy as np"<<std::endl;
+    out<<"import plotingfunctions as t"<<std::endl;
+    out<<"import planetary_data as pd"<<std::endl;
+    out<<"cb=pd."<<cb.name<<std::endl;
+    out<<"if __name__ == '__main__':"<<std::endl;
+    for(auto i: OP){
+      out<<"\tdata"<<n<<"=np.loadtxt('"<<i.file<<".dat',delimiter='\t')"<<std::endl;
+      n+=1;
+    }
+    n=0;
+    out<<"t.plot_n_orbits([";
+    
+    for(auto i: OP){
+      out<<"data"<<n<<",";
+      n+=1;
+    }
+    out<<"],labels=[";
+    
+    for(auto i: labels)
+      out<<"'"<<i<<"',";
+    
+    out<<"],cb=pd."<<cb.name<<",show_plot="<<show_plot<<",save_plot="<<save_plot<<","<<"title='"<<title<<"')"<<std::endl;
+    
+    out.close();
+    system("python plot.py");
+  }
+template <typename T>
+double calc_atm_density(double z, T &CB)
+{
+  std::vector <double> data(4,0);
+  data=find_rho_z(z,CB);
+  if (data[2]==0)
+    return 0;
+  double Hi=-(data[1]-data[0])/std::log(data[3]/data[2]);
+  
+  return data[2]*exp(-(z-data[0])/Hi);
+}
+template <typename T>
+std::vector <double> find_rho_z(double z, T &CB)
+{
+  std::vector <double> f{CB.zs[0],CB.zs[1],CB.zs[2],CB.rhos[0],CB.rhos[1],CB.rhos[2]};
+  std::vector <double> ret(4,0);
+  if (1>z || z>1000){
+    return ret;}
+  
+  //find the two point surrounding the given input altitude
+  for(int n=0; n<2; n++){
+    if (f[n]<z<f[n+1])
+      {
+	ret[0]=f[n]; ret[1]=f[n+1]; ret[2]=f[n+3]; ret[3]=f[n+4];
+	return ret;
+      }
+  }
+  return ret;
+}
