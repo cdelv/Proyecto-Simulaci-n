@@ -36,7 +36,7 @@
   //#include <SpiceZdf.h>
 #include <SpiceZfc.h>
   //#include <SpiceZim.h>
-  //#include <SpiceZmc.h>
+#include <SpiceZmc.h>
   //#include <SpiceZpl.h>
   //#include <SpiceZpr.h>
   //#include <SpiceZrnm.h>
@@ -52,4 +52,5 @@ void  oscltx_c( state, et, mu, elts );
 #include "planetary_data.h"
 #include "OrbitPropagator.h"
 #include "tools.h"
+#include "spice_tools.h"
 

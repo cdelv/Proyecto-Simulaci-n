@@ -5,13 +5,6 @@
 
 int main(void)
 {
-  //----------------------------------SPICE parameters-----------
-  
-  furnsh_c("/home/wind/Escritorio/Simulacion/Proyecto-Simulaci-n/Carlos/SPICE_DATA/solar_system_kernel.mk"); //load metakernel
-
-  std::string FRAME="ECLIPTJ2000";
-  std::string OBSERVER="SUN";
-  
   //----------------parametros del propagador--------------------
   StopC sc;                    //stop conditions
   int N=3;                    //numero de orbitas

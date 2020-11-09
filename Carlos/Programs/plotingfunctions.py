@@ -16,7 +16,7 @@ def plot_n_orbits(rs,labels,cb=pd.EARTH, show_plot=False,save_plot=False,title='
     
     n=0
     for r in rs:
-        ax.plot(r[:,0],r[:,1],r[:,2],label=labels[n],zorder=0)
+        ax.plot(r[:,0],r[:,1],r[:,2],label=labels[n],zorder=5)
         #ax.plot([r[0,0]],[r[0,1]],[r[0,2]],label='Initial position')
         n+=1
     
@@ -25,7 +25,7 @@ def plot_n_orbits(rs,labels,cb=pd.EARTH, show_plot=False,save_plot=False,title='
     _x=cb['radius']*np.cos(_u)*np.sin(_v)
     _y=cb['radius']*np.sin(_u)*np.sin(_v)
     _z=cb['radius']*np.cos(_v)
-    ax.plot_surface(_x,_y,_z,cmap='Blues',zorder=-1)
+    ax.plot_surface(_x,_y,_z,cmap='Blues',zorder=0)
     
     l=cb['radius']*2.0
     x,y,z=[[0,0,0],[0,0,0],[0,0,0]]
