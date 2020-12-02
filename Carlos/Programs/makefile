@@ -8,11 +8,11 @@ SANITFLAGS = -fsanitize=address -fsanitize=leak -fsanitize=undefined
 
 
 all: main.x
+	./main.x
 
 
 main.x: main.cpp tools.h OrbitPropagator.h 
 	$(CXX) $(CXXFLAGS) $< -o $@ $(SPICE)
-	./main.x 
 
 
 clean:

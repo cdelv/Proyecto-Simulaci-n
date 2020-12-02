@@ -57,7 +57,7 @@ void Plot_orbit_gnuplot(std::vector<OrbitPropagator> &OP,const T &cb, std::strin
      out<<"set format ''"<<std::endl;
      out<<"set angles degrees"<<std::endl;
      out<<"set xyplane at -1"<<std::endl;
-     out<<"set view 56,81"<<std::endl;
+     out<<"set view 75,20"<<std::endl;
      out<<"set lmargin screen 0"<<std::endl;
      out<<"set bmargin screen 0"<<std::endl;
      out<<"set rmargin screen 1"<<std::endl;

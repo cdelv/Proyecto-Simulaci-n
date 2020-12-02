@@ -4,7 +4,9 @@
 #include <fstream>
 #include <vector>
 #include <cmath>
+#include <any>
 #include <sstream>
+#include <cstring>
 
 
 #include <stdio.h>
@@ -43,10 +45,6 @@
   //#include <SpiceZst.h>
   //#include <zzalloc.h>
   //#include <zzerror.h>
-/*extern "C"
-{
-void  oscltx_c( state, et, mu, elts );
-}*/
 
 #include "Vector.h"
 #include "planetary_data.h"

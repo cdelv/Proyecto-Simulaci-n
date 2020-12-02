@@ -3,6 +3,7 @@
 
 const double G_meters=6.67408e-11;
 const double G=G_meters*std::pow(10,-9);
+
 class sun {
  private:
 
@@ -11,6 +12,12 @@ class sun {
   double mass=1.989e30;
   double mu=1.32712e11;
   double radius=695700.0;
+  double g0=274.0;
+  double J2=-6.84e-7;
+  std::vector<double> atmrotvector{0,0,72.9211e-6}; //dato de la tierra
+  std::vector<double> zs{63.096,251.189,1000}; //km dato de la tierra
+  std::vector<double> rhos{2.059e5,5.909e-2,3.561e-6};// # kg/km³ dato de la tierra
+  double deorbit_altitude=1000;
 };
 
 class earth {
