@@ -232,6 +232,9 @@ def find_rho_z(z,zs=pd.earth['zs'],rhos=pd.earth['rhos']):
     #if out of range return 0
     return [[0.0,0.0],[0.0,0.0]]
 
+def esc_v(r,mu=pd.earth['mu']):
+    return m.sqrt(2*mu/r)
+
 
 
 
