@@ -14,6 +14,9 @@ all: main.x
 main.x: main.cpp tools.h OrbitPropagator.h 
 	$(CXX) $(CXXFLAGS) $< -o $@ $(SPICE)
 
+coes: coescalc.cpp
+	$(CXX) $(CXXFLAGS) $< -o $@ $(SPICE)
+	./coes
 
 clean:
 	rm -rf *.x a.out *.x.*

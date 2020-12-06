@@ -48,6 +48,16 @@ moon={
 }
 moon['orbit_w']=2*np.pi/moon['Orbit_T']
 
+jupiter={
+    'name':'jupiter barycenter',
+    'mass':1.89813e27,
+    'mu':.89813e27*G,
+    'radius':69911.0,
+    'G1':G1,
+    'spice_file':A+'de432s.bsp',
+    'deorbit_altitude':2*695700.0
+}
+
 bodies={
 'earth':earth,
 'sun':sun,

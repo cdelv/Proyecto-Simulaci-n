@@ -33,7 +33,9 @@ def null_perts():
     'srp':False,
     'CR':0,
     'A_srp':0,
-    'C20':0
+    'C20':0,
+    'BSTAR':False,
+    'B*':0
     }
 
 
@@ -155,6 +157,16 @@ class OrbitPropagator:
             return False
         return True
 
+    def check_escape_velocity(self):
+        if _t.esc_v(_t.norm(self.y[step,:3]),mu=self.cb['mu'])<_t.norm(self.y[self.step,3:6]):
+            self.print_stop_conditions('scape_velocity')
+            return False
+        return True
+
+    def print_stop_conditions(self,parameter):
+
+        print('Spacecraft has reached %s after %2.f days (%2.f hours or %2.f seconds)' %(parameter,self.ts[self.step]*days))
+
     def check_stop_conditions(self):
         #for each stop condition
         for sc in self.stop_conditions_functions:
@@ -193,6 +205,7 @@ class OrbitPropagator:
         self.masses=self.y[:self.step,-1]
         self.alts=self.alts[:self.step]
         
+        
     def diffy_q(self,t,y):
     
         #unpack state
@@ -220,16 +233,30 @@ class OrbitPropagator:
         #aero drag perturbation
         if self.perts['aero']:
 
-            #calculate altitude and air density
-            z=norm_r-self.cb['radius']
-            rho=_t.calc_atmospheric_density(z)
+            if self.perts['BSTAR']:
+                #calculate altitude and air density
+                z=norm_r-self.cb['radius']
+                rho=_t.calc_atmospheric_density(z)
 
-            #calculate motion of s/c with respect to rotating atmosphere
-            v_rel=v-np.cross(self.cb['atm_rot_vector'],r)
+                #calculate motion of s/c with respect to rotating atmosphere
+                v_rel=v-np.cross(self.cb['atm_rot_vector'],r)
 
-            drag=-v_rel*0.5*rho*np.linalg.norm(v_rel)*self.perts['Cd']*self.perts['A']/self.mass
+                drag=-v_rel*np.linalg.norm(v_rel)*self.perts['B*']/self.cb['radius']
 
-            a+=drag
+                a+=drag
+
+            else:
+
+                #calculate altitude and air density
+                z=norm_r-self.cb['radius']
+                rho=_t.calc_atmospheric_density(z)
+
+                #calculate motion of s/c with respect to rotating atmosphere
+                v_rel=v-np.cross(self.cb['atm_rot_vector'],r)
+
+                drag=-v_rel*0.5*rho*np.linalg.norm(v_rel)*self.perts['Cd']*self.perts['A']/self.mass
+
+                a+=drag
 
 
         #thust perturbation
@@ -289,8 +316,6 @@ class OrbitPropagator:
             self.coes[n,:]=_t.rv2coes(self.y[n,:6],mu=self.cb['mu'],degres=degres,print_results=print_results)
 
         self.coes_rel=self.coes-self.coes[0,:]
-
-        print(time()-start)
 
     def plot_coes(self,hours=False,days=False,show_plot=False,save_plot=False,title='COEs',figsize=(20,12),dpi=500,rel=True):
         print('Ploting COEs ...')
@@ -462,7 +487,17 @@ class OrbitPropagator:
         if save_plot:
             plt.savefig(title+'.png',dpi=dpi)
 
+    def printcoes(self):
+        #x,y,z,vx,vy,vz,m=self.y[-1,:]
 
+        #print(x,y,z,vx,vy,vz)
+        rf=self.coes[-1,:]
+        print('a=',rf[0]) 
+        print('e=',rf[1]) 
+        print('i=',rf[2]) 
+        print('ta=',rf[3]) 
+        print('aop=',rf[4]) 
+        print('raan=',rf[5]) 
             
 
         

@@ -18,6 +18,8 @@ def normed(v):
     return np.array(v)/norm(v)
 
 def plot_n_orbits(rs,labels,cb=pd.earth, show_plot=False,save_plot=False,title='Many Orbits'):
+
+    print('ploting orbits...')
     
     #3D plot
     fig=plt.figure(figsize=(300,300))
@@ -45,6 +47,7 @@ def plot_n_orbits(rs,labels,cb=pd.earth, show_plot=False,save_plot=False,title='
     
     #check for custom axes limits
     max_val=np.max(np.abs(rs))
+    #max_val=100000000
         
     #set lables and title
     ax.set_xlim([-max_val,max_val])
@@ -97,12 +100,12 @@ def rv2coes(state,et=0,mu=pd.earth['mu'],degres=False,print_results=False):
 
 
     if degres:
-        i*=d2r
-        ta*=d2r
-        aop*=d2r
-        raan*=d2r
+        i*=r2d
+        ta*=r2d
+        aop*=r2d
+        raan*=r2d
     if print_results:
-        print(osc_els)
+        print(a,e,i,ta,aop,raan)
 
     return a,e,i,ta,aop,raan
     
@@ -154,32 +157,64 @@ def tle2coes(tle_filename,mu=pd.earth['mu'], degres=False):
     year,month,day,hour=calc_epoch(epoch)
 
     #collect coes
+    if degres:
+        #inclination
+        i=float(line2[2])
+        #right ascention of ascending node
+        raan=float(line2[2])
+        #eccentricity
+        e_string=line2[4]
+        e=float('0.' +e_string)
+        #argument of perigee
+        aop=float(line2[5])
+        #mean anomaly
+        Me=float(line2[6])
+        #mean motion
+        mean_motion=float(line2[7]) #revs/day
+        #period
+        T=1/mean_motion*24*3600 #seconds
+        #semi mjor axis
+        a=(T**2*mu/4.0/np.pi**2)**(1/3.0)
 
-    #inclination
-    i=float(line2[2])*d2r #rad
-    #right ascention of ascending node
-    raan=float(line2[2])*d2r #rad
-    #eccentricity
-    e_string=line2[4]
-    e=float('0.' +e_string)
-    #argument of perigee
-    aop=float(line2[5])*d2r #rad
-    #mean anomaly
-    Me=float(line2[6])*d2r #rad
-    #mean motion
-    mean_motion=float(line2[7]) #revs/day
-    #period
-    T=1/mean_motion*24*3600 #seconds
-    #semi mjor axis
-    a=(T**2*mu/4.0/np.pi**2)**(1/3.0)
+        #calculate eccentric anomaly
+        E=ecc_anomaly([Me,e],'newton')
 
-    #calculate eccentric anomaly
-    E=ecc_anomaly([Me,e],'newton')
+        #calculate the true anomaly
+        ta=true_anomaly([E,e])
 
-    #calculate the true anomaly
-    ta=true_anomaly([E,e])
+        print(a,e,i,ta,aop,raan)
 
-    return a,e,i,ta,aop,raan
+        return a,e,i,ta,aop,raan    
+
+    else:
+
+        #inclination
+        i=float(line2[2])*d2r #rad
+        #right ascention of ascending node
+        raan=float(line2[2])*d2r #rad
+        #eccentricity
+        e_string=line2[4]
+        e=float('0.' +e_string)
+        #argument of perigee
+        aop=float(line2[5])*d2r #rad
+        #mean anomaly
+        Me=float(line2[6])*d2r #rad
+        #mean motion
+        mean_motion=float(line2[7]) #revs/day
+        #period
+        T=1/mean_motion*24*3600 #seconds
+        #semi mjor axis
+        a=(T**2*mu/4.0/np.pi**2)**(1/3.0)
+
+        #calculate eccentric anomaly
+        E=ecc_anomaly([Me,e],'newton')
+
+        #calculate the true anomaly
+        ta=true_anomaly([E,e])
+        
+        print(a,e,i,ta,aop,raan)
+
+        return a,e,i,ta,aop,raan
 
 def calc_epoch(epoch):
     #year

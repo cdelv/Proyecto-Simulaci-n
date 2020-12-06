@@ -36,9 +36,9 @@
 #include <SpiceUsr.h>
   //#include <SpiceZad.h>
   //#include <SpiceZdf.h>
-#include <SpiceZfc.h>
+//#include <SpiceZfc.h>
   //#include <SpiceZim.h>
-#include <SpiceZmc.h>
+//#include <SpiceZmc.h>
   //#include <SpiceZpl.h>
   //#include <SpiceZpr.h>
   //#include <SpiceZrnm.h>

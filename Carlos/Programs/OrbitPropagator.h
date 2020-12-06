@@ -142,11 +142,11 @@ void OrbitPropagator::propagate_orbit(const T &CB,perturbations &perts)
     Mueva_r(dt,E);
     Mueva_m(dt,E);
     
-    if(check_deorbit(CB))
+     if(check_deorbit(CB))
       {
 	std::cout <<" after "<<t<<"seconds"<<std::endl;
 	break;
-      }
+	}
     
     if(cuenta%tcuadro==0){
       fout << r.x() <<"\t"<< r.y() <<"\t"<< r.z()<<"\t"<< v.x() <<"\t"<< v.y() <<"\t"<< v.z()<<"\t"<< t << std::endl;
