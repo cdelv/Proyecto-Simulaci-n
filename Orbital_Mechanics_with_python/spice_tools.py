@@ -50,3 +50,13 @@ def tc2array(tcs,steps):
 #get ephemerides data
 def get_ephemerides_data(target,times,frame,observer):
 	return np.array(spice.spkezr(target,times,frame,'NONE',observer)[0])
+
+def load_ephemeris(target, times, frame, observer):
+	
+	if type( target )==str:
+		return np.array(spice.spkezr(target,times,frame,'NONE',observer)[0])
+	else:
+		return np.array(spice.spkez(target,times,frame,'NONE',observer)[0])
+
+
+

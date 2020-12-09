@@ -13,22 +13,19 @@ from OrbitPropagator import null_perts
 cb=pd.earth
 
 #total time
-tspan=70992.6
-
-#tspan=38000.698
+tspan=60623.4
 
 #time step
-dt=0.01
+dt=1
 
-date0='2020-12-06-09:02:44'
+date0='5/12/2020-10:19:19'
 
-
-mass0=419725
+mass0=1457
 
 if __name__ == '__main__':
 
         #initial conditions
-        iss_coes=_t.tle2coes('iss.txt',degres=True)
+        iss_coes=_t.tle2coes('NOAA15.txt',degres=True)
 
         #state0=[42164.0,0.001,0.0,0.0,0.0,0.0]
 
@@ -38,17 +35,17 @@ if __name__ == '__main__':
 
         perts['aero']=True
         perts['Cd']=2.0
-        perts['A']=0.004 #km²
+        perts['A']=0.00031 #km²
 
         perts['srp']=True
-        perts['a_srp']=0.004
-        perts['CR']=0.4
+        perts['A_srp']=0.00031
+        perts['CR']=1
 
         #perts['BSTAR']=True
         #perts['B*']=0.000020351
 
-        #add lunar gravity perturbation
-        perts['n_bodies']=[pd.moon]+[pd.sun]+[pd.jupiter]
+        #add n_body gravity perturbation
+        perts['n_bodies']=[pd.moon]+[pd.sun]+[pd.jupiter]+[pd.venus]+[pd.mars]+[pd.mercury]+[pd.saturn]+[pd.neptune]+[pd.uranus]
 
        
         op_ISS=OP(iss_coes,tspan,dt,coes=True,degres=True,perts=perts,date0=date0,mass0=mass0,propagator='lsoda')

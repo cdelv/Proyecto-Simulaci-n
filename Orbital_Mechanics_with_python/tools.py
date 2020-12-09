@@ -7,9 +7,11 @@ from mpl_toolkits.mplot3d import Axes3D
 plt.style.use('dark_background')
 
 import planetary_data as pd
+from OrbitPropagator import OrbitPropagator as OP
 
 d2r=np.pi/180
 r2d=180/np.pi
+pi=m.pi
 
 def norm(v):
     return np.linalg.norm(v)
@@ -22,15 +24,18 @@ def plot_n_orbits(rs,labels,cb=pd.earth, show_plot=False,save_plot=False,title='
     print('ploting orbits...')
     
     #3D plot
-    fig=plt.figure(figsize=(300,300))
+    fig=plt.figure(figsize=(20,20))
     ax=fig.add_subplot(111,projection='3d')
     
     #plot trayectory and starting point
     
     n=0
+    max_val=0
+
     for r in rs:
         ax.plot(r[:,0],r[:,1],r[:,2],label=labels[n],zorder=5)
         #ax.plot([r[0,0]],[r[0,1]],[r[0,2]],label='Initial position')
+        max_val = max( [ r.max(), max_val ] )
         n+=1
     
     #plot earth
@@ -45,9 +50,6 @@ def plot_n_orbits(rs,labels,cb=pd.earth, show_plot=False,save_plot=False,title='
     u,v,w=[[l,0,0],[0,l,0],[0,0,l]]
     ax.quiver(x,y,z,u,v,w,color='k')
     
-    #check for custom axes limits
-    max_val=np.max(np.abs(rs))
-    #max_val=100000000
         
     #set lables and title
     ax.set_xlim([-max_val,max_val])
@@ -269,6 +271,65 @@ def find_rho_z(z,zs=pd.earth['zs'],rhos=pd.earth['rhos']):
 
 def esc_v(r,mu=pd.earth['mu']):
     return m.sqrt(2*mu/r)
+
+def hohmann_transfer(r0=0.0,r1=0.0,cb=pd.earth,coes0=[],coes1=[],dt=1,altitude=True,output_dir='',names=['Initial','Final','Transfer'],write_output=False,propagate=False):
+
+    #check if coes passed in
+    if coes0:
+
+        r0=coes0[0]
+        r1=coes1[0]
+
+    #if passin in altitude, not semi mayor axixs
+    elif altitude:
+
+        r0+=cb['radius']
+        r1+=cb['radius']
+
+    #calculate semi mayor axis of transfer orbit
+    a_transfer=(r0+r1)/2.0
+
+    #calculate velocities of circular orbit
+    v_circ_init=m.sqrt(cb['mu']/r0)
+    v_circ_final=m.sqrt(cb['mu']/r1)
+
+    #calculate eliptical orvit velocities (vis-viva equation)
+    v0_transfer=m.sqrt(cb['mu']*(2/r0 -1/a_transfer))
+    v1_transfer=m.sqrt(cb['mu']*(2/r1 -1/a_transfer))
+
+    #calculate transfer time (half period)
+    t_transfer=pi*m.sqrt(a_transfer**3 /cb['mu'])
+
+    #calculate delta v values
+    delta_vs=[v0_transfer- v_circ_init, v_circ_final- v1_transfer]
+
+    if propagate:
+
+        #if coes not pased in
+        if not coes0:
+            coes0=[r0,0.0,0.0,0.0,0.0,0.0]
+            coes1=[r1,0.0,0.0,0.0,0.0,0.0]
+
+        #calculate excentricity of transfer orbit
+        e_transfer=1-r0/a_transfer
+
+        #coes for transfer orbit
+        coes_transfer=[a_transfer,e_transfer,coes0[2],0.0,coes0[4],coes0[5]]
+
+        #calculate periods of initial and final orbit
+        T0=pi*(r0**3 /cb['mu'])**0.5
+        T1=pi*(r1**3 /cb['mu'])**0.5
+
+        #create space craft instance and propagate orbit
+        sc0=OP(coes0,T0,dt,coes=True)
+        sc1=OP(coes1,T1,dt,coes=True)
+        sc2=OP(coes_transfer,t_transfer,dt,coes=True)
+
+        return sc0,sc1,sc2,delta_vs,t_transfer
+
+    return delta_vs, t_transfer
+
+
 
 
 

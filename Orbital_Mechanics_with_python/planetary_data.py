@@ -51,15 +51,55 @@ moon['orbit_w']=2*np.pi/moon['Orbit_T']
 jupiter={
     'name':'jupiter barycenter',
     'mass':1.89813e27,
-    'mu':.89813e27*G,
-    'radius':69911.0,
-    'G1':G1,
+    'mu':1.89813e27*G,
     'spice_file':A+'de432s.bsp',
-    'deorbit_altitude':2*695700.0
+}
+saturn={
+    'name':'saturn barycenter',
+    'mass':5.683e26,
+    'mu':5.683e26*G,
+    'spice_file':A+'de432s.bsp',
+}
+venus={
+    'name':'venus barycenter',
+    'mass':4.867e24,
+    'mu':4.867e24*G,
+    'spice_file':A+'de432s.bsp',
+}
+mars={
+    'name':'mars barycenter',
+    'mass':6.39e23,
+    'mu':6.39e23*G,
+    'spice_file':A+'de432s.bsp',
+}
+mercury={
+    'name':'mercury barycenter',
+    'mass':3.285e23,
+    'mu':3.285e23*G,
+    'spice_file':A+'de432s.bsp',
+}
+neptune={
+    'name':'neptune barycenter',
+    'mass':1.024e26,
+    'mu':1.024e26*G,
+    'spice_file':A+'de432s.bsp',
+}
+uranus={
+    'name':'uranus barycenter',
+    'mass':8.681e25,
+    'mu':8.681e25*G,
+    'spice_file':A+'de432s.bsp',
 }
 
 bodies={
 'earth':earth,
 'sun':sun,
-'moon':moon
+'moon':moon,
+'jupiter':jupiter,
+'saturn':saturn,
+'venus':venus,
+'mars':mars,
+'mercury':mercury,
+'neptune':neptune,
+'uranus':uranus,
 }

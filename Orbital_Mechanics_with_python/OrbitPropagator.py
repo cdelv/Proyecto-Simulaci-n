@@ -280,6 +280,7 @@ class OrbitPropagator:
             #nth body acceleration vector
             a+=body['mu']*(r_sat2body/_t.norm(r_sat2body)**3-r_cb2nb/_t.norm(r_cb2nb)**3)
 
+
         #solar radiation preasure
         if self.perts['srp']:
 
@@ -287,8 +288,9 @@ class OrbitPropagator:
             r_sun2sc=self.cb['states'][self.step,:3]+r
 
             #srp vector from given ephemerides data 
-            a+=(1+self.perts['CR'])*pd.sun['G1']*self.perts['A_srp']/mass/_t.norm(r_sun2sc)**3*r_sun2sc
+            srp=((1+self.perts['CR'])*pd.sun['G1']*self.perts['A_srp'])/(mass*_t.norm(r_sun2sc)**3*r_sun2sc)
 
+            a+=srp
         
         return [vx,vy,vz,a[0],a[1],a[2],dmdt]
 

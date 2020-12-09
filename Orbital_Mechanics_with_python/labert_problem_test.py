@@ -19,8 +19,8 @@ dt=1000.0
 cb=pd.sun
 
 #initial conditions 
-date0='2005-12-01'
-datef='2006-03-01'
+date0='2016-04-25'
+datef='2024-08-15'
 
 #reference frame
 FRAME='ECLIPJ2000'
@@ -47,8 +47,8 @@ if __name__ == '__main__':
 	tiem_arr=np.linspace(et0,etf,10000)
 
 	#calculate earth and venus state vector at initial time
-	states_earth=st.get_ephemerides_data('EARTH',tiem_arr,FRAME,OBSEVER)
-	states_venus=st.get_ephemerides_data('VENUS',tiem_arr,FRAME,OBSEVER)
+	states_earth=st.get_ephemerides_data('JUPITER BARYCENTER',tiem_arr,FRAME,OBSEVER)
+	states_venus=st.get_ephemerides_data('SATURN BARYCENTER',tiem_arr,FRAME,OBSEVER)
 
 	#space craft initial position vector
 	r0=states_earth[0,:3]
@@ -68,10 +68,11 @@ if __name__ == '__main__':
 	#
 	#
 	#
+	lt.print_delta_v(v0,vf,states_earth[1,3:],states_venus[-1,3:])
 
 	_t.plot_n_orbits([states_earth[:,:3],states_venus[:,:3],op_sc.rs]
-		,labels=['Earth','Venus','Spacecraft']
-		,cb=cb,show_plot=True,title='Earth to Venus transfer')
+		,labels=['Earth','Mars','Spacecraft']
+		,cb=cb,show_plot=True,title='Jupiter to Saturn transfer')
 
 
 
